@@ -11,9 +11,9 @@ const keyboardRowsData = [
 ];
 
 class Keyboard extends StatelessWidget {
-  final VoidCallback onKeyPress;
-  final VoidCallback onEnterPress;
-  final VoidCallback onDeletePress;
+  final Function onKeyPress;
+  final Function onEnterPress;
+  final Function onDeletePress;
 
   const Keyboard({
     Key? key,
@@ -40,19 +40,19 @@ class Keyboard extends StatelessWidget {
                           letter: letter,
                           width: 56,
                           backgroundColor: Colors.white,
-                          onKeyPress: onEnterPress,
+                          onKeyPress: ()  => onEnterPress(),
                         );
                       case "DEL":
                         return _KeyboardButton(
                           letter: letter,
                           backgroundColor: Colors.white,
-                          onKeyPress: onDeletePress,
+                          onKeyPress: () => onDeletePress(),
                         );
                       default:
                         return _KeyboardButton(
                           letter: letter,
                           backgroundColor: Colors.white,
-                          onKeyPress: onKeyPress,
+                          onKeyPress: () => onKeyPress(letter),
                         );
                     }
                   },

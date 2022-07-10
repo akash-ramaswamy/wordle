@@ -5,8 +5,9 @@ final TextStyle letterContainerTextStyle = GoogleFonts.getFont(
   'Solway',
   textStyle: const TextStyle(
     fontWeight: FontWeight.bold,
-    fontSize: 40,
+    fontSize: 35,
     color: Colors.white,
+    textBaseline: TextBaseline.alphabetic 
   ),
 );
 
