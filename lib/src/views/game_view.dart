@@ -16,20 +16,35 @@ class GameView extends StatefulWidget {
 }
 
 class _GameViewState extends State<GameView> {
+
+  // By default, the game would have a 5 letter word, 
+  // to be found out within 6 max guesses.
+
+  // So, create 6 Words (6 max guesses),
   final List<Word> _words = List.generate(6, (_) {
     return Word(
+      // with 5 letters each...
       letters: List.generate(5, (_) {
         return Letter.empty();
       }),
     );
   });
-  int currentWordIndex = 0;
-  Word _solution = Word.fromString("hello");
 
+  int currentWordIndex = 0;
+
+  // On pressing any alphabet in the keyboard, add that letter to word
   _onKeyPressed(String letter) {
     Word currentWord = _words[currentWordIndex];
     setState(() {
       currentWord.addLetter(letter);
+    });
+  }
+
+  // On pressing DEL key, remove the last entered letter
+  _onDeleteKeyPressed() {
+    Word currentWord = _words[currentWordIndex];
+    setState(() {
+      currentWord.removeLetter();
     });
   }
 
@@ -52,7 +67,7 @@ class _GameViewState extends State<GameView> {
                 Board(words: _words),
                 const SizedBox(height: 20),
                 Keyboard(
-                  onDeletePress: () {},
+                  onDeletePress: _onDeleteKeyPressed,
                   onEnterPress: () {},
                   onKeyPress: _onKeyPressed,
                 ),
