@@ -1,9 +1,11 @@
+import "dart:math";
 import 'package:flutter/material.dart';
 
 import '../components/app_bar.dart';
 import '../components/board.dart';
 import '../components/keyboard.dart';
 import '../components/result_dialog.dart';
+import '../data/words_list.dart';
 import '../models/letter.dart';
 import '../models/word.dart';
 import '../theme/colors.dart';
@@ -31,7 +33,7 @@ class _GameViewState extends State<GameView> {
   });
 
   int currentWordIndex = 0;
-  Word solution = Word.fromString("hello");
+  Word solution = Word.fromString(wordsList[Random().nextInt(wordsList.length)].toLowerCase());
 
   // On pressing any alphabet in the keyboard, add that letter to word
   _onKeyPressed(String letter) {
@@ -88,7 +90,7 @@ class _GameViewState extends State<GameView> {
     String solutionWord = solution.wordString;
     bool hasWon = currentWord.wordString == solution.wordString;
     String resultText =
-        hasWon ? "You win" : "You have lost! The word was $solutionWord";
+        hasWon ? "You win" : "You have lost!\nThe word was ${solutionWord.toUpperCase()}";
 
     if (!hasWon && currentWordIndex == words.length - 1 || hasWon) {
       _showResultDialog(resultText);
@@ -111,6 +113,7 @@ class _GameViewState extends State<GameView> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("The word is ${solution.wordString}");
     return Scaffold(
       appBar: buildAppBar(),
       body: Column(
