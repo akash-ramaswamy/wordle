@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../components/app_bar.dart';
 import '../components/board.dart';
 import '../components/keyboard.dart';
+import '../components/result_dialog.dart';
 import '../models/letter.dart';
 import '../models/word.dart';
 import '../theme/colors.dart';
@@ -20,7 +21,7 @@ class _GameViewState extends State<GameView> {
   // to be found out within 6 max guesses.
 
   // So, create 6 Words (6 max guesses),
-  List<Word> _words = List.generate(6, (_) {
+  List<Word> words = List.generate(6, (_) {
     return Word(
       // with 5 letters each...
       letters: List.generate(5, (_) {
@@ -34,93 +35,78 @@ class _GameViewState extends State<GameView> {
 
   // On pressing any alphabet in the keyboard, add that letter to word
   _onKeyPressed(String letter) {
-    Word currentWord = _words[currentWordIndex];
-    setState(() {
-      currentWord.addLetter(letter);
-    });
+    Word currentWord = words[currentWordIndex];
+    setState(() => currentWord.addLetter(letter));
   }
 
   // On pressing DEL key, remove the last entered letter
   _onDeleteKeyPressed() {
-    Word currentWord = _words[currentWordIndex];
+    Word currentWord = words[currentWordIndex];
     setState(() {
       currentWord.removeLetter();
     });
   }
 
   // On pressing ENTER key, submit the solution
-  _onEnterKeyPressed() {
-    Word currentWord = _words[currentWordIndex];
-    setState(() {
-      if (_words.length - 1 >= currentWordIndex) {
-        for (var i = 0; i < currentWord.letters.length; i++) {
-          Letter currentLetter = currentWord.letters[i];
-          if (solution.letters[i] == currentLetter) {
-            currentWord.letters[i] = currentLetter.copywith(
-              null,
-              LetterStatus.inCorrectPlace,
-            );
-          } else if (solution.letters.contains(currentLetter)) {
-            currentWord.letters[i] = currentLetter.copywith(
-              null,
-              LetterStatus.inWrongPlace,
-            );
-          } else {
-            currentWord.letters[i] = currentLetter.copywith(
-              null,
-              LetterStatus.notInWord,
-            );
-          }
-        }
-      }
-      if (_words.length - 1 == currentWordIndex) {
-        String solutionWord = solution.wordString;
-        bool hasWon = currentWord == solution;
-        showDialog(
-          builder: (BuildContext newContext) {
-            return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    !hasWon
-                        ? Text(
-                            "You Lost!. The word was $solutionWord",
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text("You Won"),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(newContext).pop();
-                        setState(() {
-                          currentWordIndex = 0;
-                          _words = List.generate(6, (_) {
-                            return Word(
-                              // with 5 letters each...
-                              letters: List.generate(5, (_) {
-                                return Letter.empty();
-                              }),
-                            );
-                          });
-                        });
-                      },
-                      child: Text("Restart"),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-          context: context,
-          barrierDismissible: true,
+  _onEnterKeyPressed() => setState(_checkGuess);
+
+  _resetGame() {
+    words = List.generate(6, (_) {
+      return Word(
+        letters: List.generate(5, (_) {
+          return Letter.empty();
+        }),
+      );
+    });
+
+    currentWordIndex = 0;
+  }
+
+  _checkGuess() {
+    Word currentWord = words[currentWordIndex];
+
+    for (var i = 0; i < currentWord.letters.length; i++) {
+      Letter currentLetter = currentWord.letters[i];
+      if (solution.letters[i] == currentLetter) {
+        currentWord.letters[i] = currentLetter.copywith(
+          null,
+          LetterStatus.inCorrectPlace,
+        );
+      } else if (solution.letters.contains(currentLetter)) {
+        currentWord.letters[i] = currentLetter.copywith(
+          null,
+          LetterStatus.inWrongPlace,
         );
       } else {
-        currentWordIndex++;
+        currentWord.letters[i] = currentLetter.copywith(
+          null,
+          LetterStatus.notInWord,
+        );
       }
-    });
+    }
+
+    String solutionWord = solution.wordString;
+    bool hasWon = currentWord.wordString == solution.wordString;
+    String resultText =
+        hasWon ? "You win" : "You have lost! The word was $solutionWord";
+
+    if (!hasWon && currentWordIndex == words.length - 1 || hasWon) {
+      _showResultDialog(resultText);
+    } else if (currentWordIndex != words.length - 1) {
+      currentWordIndex++;
+    }
+  }
+
+  _showResultDialog(String resultText) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return ResultDialog(
+          resultText: resultText,
+          action: () => setState(_resetGame),
+        );
+      },
+    );
   }
 
   @override
@@ -139,7 +125,7 @@ class _GameViewState extends State<GameView> {
             padding: defaultPadding,
             child: Column(
               children: [
-                Board(words: _words),
+                Board(words: words),
                 const SizedBox(height: 20),
                 Keyboard(
                   onDeletePress: _onDeleteKeyPressed,
