@@ -33,7 +33,8 @@ class _GameViewState extends State<GameView> {
   });
 
   int currentWordIndex = 0;
-  Word solution = Word.fromString(wordsList[Random().nextInt(wordsList.length)].toLowerCase());
+  Word solution = Word.fromString(
+      wordsList[Random().nextInt(wordsList.length)].toLowerCase());
 
   // On pressing any alphabet in the keyboard, add that letter to word
   _onKeyPressed(String letter) {
@@ -67,30 +68,37 @@ class _GameViewState extends State<GameView> {
   _checkGuess() {
     Word currentWord = words[currentWordIndex];
 
+    bool noEmptyLetters = true;
+    for (var i = 0; i < currentWord.letters.length; i++) {
+      Letter currentLetter = currentWord.letters[i];
+      if (currentLetter.val.isEmpty) {
+        currentWord.letters[i] =
+            currentWord.letters[i].copywith(isEmptyValue: true);
+        noEmptyLetters = false;
+      }
+    }
+
+    if (!noEmptyLetters) return;
+
     for (var i = 0; i < currentWord.letters.length; i++) {
       Letter currentLetter = currentWord.letters[i];
       if (solution.letters[i] == currentLetter) {
-        currentWord.letters[i] = currentLetter.copywith(
-          null,
-          LetterStatus.inCorrectPlace,
-        );
+        currentWord.letters[i] =
+            currentLetter.copywith(status: LetterStatus.inCorrectPlace);
       } else if (solution.letters.contains(currentLetter)) {
-        currentWord.letters[i] = currentLetter.copywith(
-          null,
-          LetterStatus.inWrongPlace,
-        );
+        currentWord.letters[i] =
+            currentLetter.copywith(status: LetterStatus.inWrongPlace);
       } else {
-        currentWord.letters[i] = currentLetter.copywith(
-          null,
-          LetterStatus.notInWord,
-        );
+        currentWord.letters[i] =
+            currentLetter.copywith(status: LetterStatus.notInWord);
       }
     }
 
     String solutionWord = solution.wordString;
     bool hasWon = currentWord.wordString == solution.wordString;
-    String resultText =
-        hasWon ? "You win" : "You have lost!\nThe word was ${solutionWord.toUpperCase()}";
+    String resultText = hasWon
+        ? "You win"
+        : "You have lost!\nThe word was ${solutionWord.toUpperCase()}";
 
     if (!hasWon && currentWordIndex == words.length - 1 || hasWon) {
       _showResultDialog(resultText);
