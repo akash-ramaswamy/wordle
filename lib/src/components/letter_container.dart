@@ -16,6 +16,7 @@ class LetterContainer extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(10)),
         color: letter.backgroundColor,
+        border: letter.border,
       ),
       alignment: Alignment.center,
       width: 60,
